@@ -54,30 +54,57 @@ const linkifyText = (text: string) => {
   // URL regex pattern
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   
-  // Split the text by URLs
-  const parts = text.split(urlRegex);
-  
   // Find all URLs in the text
-  const urls = text.match(urlRegex) || [];
+  const matches = [...text.matchAll(urlRegex)];
   
-  // Combine parts and URLs
+  // If no URLs found, return the original text
+  if (matches.length === 0) {
+    return text;
+  }
+  
+  // Track processed URLs to avoid duplicates
+  const processedUrls = new Set();
+  
+  // Create result array
   const result = [];
+  let lastIndex = 0;
   
-  for (let i = 0; i < parts.length; i++) {
-    result.push(parts[i]);
-    if (i < urls.length) {
-      result.push(
-        <a 
-          key={i} 
-          href={urls[i]} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="text-blue-600 hover:underline break-words"
-        >
-          {urls[i]}
-        </a>
-      );
+  // Process each URL match
+  matches.forEach((match) => {
+    const url = match[0];
+    const startIndex = match.index;
+    
+    // Skip if this exact URL has already been processed
+    if (processedUrls.has(url)) {
+      return;
     }
+    
+    // Add text before the URL
+    if (startIndex > lastIndex) {
+      result.push(text.substring(lastIndex, startIndex));
+    }
+    
+    // Add the URL as a link
+    result.push(
+      <a 
+        key={startIndex} 
+        href={url} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="text-blue-600 hover:underline break-words"
+      >
+        {url}
+      </a>
+    );
+    
+    // Update lastIndex and mark URL as processed
+    lastIndex = startIndex + url.length;
+    processedUrls.add(url);
+  });
+  
+  // Add any remaining text
+  if (lastIndex < text.length) {
+    result.push(text.substring(lastIndex));
   }
   
   return result;
