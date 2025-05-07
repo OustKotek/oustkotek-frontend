@@ -34,6 +34,33 @@ const formatDate = (dateString: string) => {
   });
 };
 
+const getFileNameFromUrl = (url: string): string => {
+  // Extract filename from URL
+  const urlParts = url.split('/');
+  let fileName = urlParts[urlParts.length - 1];
+  
+  // Remove query parameters if present
+  if (fileName.includes('?')) {
+    fileName = fileName.split('?')[0];
+  }
+  
+  // If no extension is detected in the URL, try to determine from the content type
+  if (!fileName.includes('.')) {
+    // For Cloudinary URLs, we can check if it contains format indicators
+    if (url.includes('/image/') || url.includes('/format=jpg')) {
+      fileName += '.jpg';
+    } else if (url.includes('/raw/') && url.includes('xlsx')) {
+      fileName += '.xlsx';
+    } else if (url.includes('/raw/') && url.includes('xls')) {
+      fileName += '.xls';
+    } else if (url.includes('/raw/') && url.includes('pdf')) {
+      fileName += '.pdf';
+    }
+  }
+  
+  return fileName;
+};
+
 const PostCard = ({ post }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
@@ -83,14 +110,14 @@ const PostCard = ({ post }) => {
 
         <p className="text-lg mb-3">{post.description}</p>
 
-        {post.attachment && (
+        {post.file_url && (
           <div className="mt-4 flex justify-end">
             <Button asChild variant="link" size="sm">
               <a
-                href={post.attachment}
+                href={post.file_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                download={post.file_name || true}
+                download={post.file_name || getFileNameFromUrl(post.file_url)}
                 className="text-red-500"
               >
                 Download
