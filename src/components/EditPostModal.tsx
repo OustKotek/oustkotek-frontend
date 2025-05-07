@@ -31,14 +31,22 @@ const EditPostModal = ({ post, open, onOpenChange }: EditPostModalProps) => {
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { mutate: editPost, isPending } = useUpdatePost();
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
+    // Store reference to the trigger button when modal opens
     if (open) {
+      triggerRef.current = document.activeElement as HTMLButtonElement;
       setDescription(post.description);
       setFile(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
+    } else if (triggerRef.current) {
+      // Return focus to trigger when modal closes
+      setTimeout(() => {
+        triggerRef.current?.focus();
+      }, 0);
     }
   }, [open, post]);
 

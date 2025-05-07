@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,6 +21,20 @@ const DeleteAlertModal = ({
   setShowDeleteAlert,
   handleDelete,
 }: DeleteAlertModalProps) => {
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  
+  useEffect(() => {
+    // Store reference to the trigger button when modal opens
+    if (showDeleteAlert) {
+      triggerRef.current = document.activeElement as HTMLButtonElement;
+    } else if (triggerRef.current) {
+      // Return focus to trigger when modal closes
+      setTimeout(() => {
+        triggerRef.current?.focus();
+      }, 0);
+    }
+  }, [showDeleteAlert]);
+
   return (
     <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
       <AlertDialogContent>
