@@ -36,28 +36,28 @@ const formatDate = (dateString: string) => {
 
 const getFileNameFromUrl = (url: string): string => {
   // Extract filename from URL
-  const urlParts = url.split('/');
+  const urlParts = url.split("/");
   let fileName = urlParts[urlParts.length - 1];
-  
+
   // Remove query parameters if present
-  if (fileName.includes('?')) {
-    fileName = fileName.split('?')[0];
+  if (fileName.includes("?")) {
+    fileName = fileName.split("?")[0];
   }
-  
+
   // If no extension is detected in the URL, try to determine from the content type
-  if (!fileName.includes('.')) {
+  if (!fileName.includes(".")) {
     // For Cloudinary URLs, we can check if it contains format indicators
-    if (url.includes('/image/') || url.includes('/format=jpg')) {
-      fileName += '.jpg';
-    } else if (url.includes('/raw/') && url.includes('xlsx')) {
-      fileName += '.xlsx';
-    } else if (url.includes('/raw/') && url.includes('xls')) {
-      fileName += '.xls';
-    } else if (url.includes('/raw/') && url.includes('pdf')) {
-      fileName += '.pdf';
+    if (url.includes("/image/") || url.includes("/format=jpg")) {
+      fileName += ".jpg";
+    } else if (url.includes("/raw/") && url.includes("xlsx")) {
+      fileName += ".xlsx";
+    } else if (url.includes("/raw/") && url.includes("xls")) {
+      fileName += ".xls";
+    } else if (url.includes("/raw/") && url.includes("pdf")) {
+      fileName += ".pdf";
     }
   }
-  
+
   return fileName;
 };
 
@@ -74,7 +74,11 @@ const PostCard = ({ post }) => {
         setShowDeleteAlert(false);
       },
       onError: (err) => {
-        toast({ title: "Error", description: err.message, variant: "destructive" });
+        toast({
+          title: "Error",
+          description: err.message,
+          variant: "destructive",
+        });
       },
     });
   };
@@ -91,33 +95,37 @@ const PostCard = ({ post }) => {
           </div>
 
           {/* 3-dot dropdown */}
-          {user?.role === 'admin' && <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
-                <MoreVertical className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-28">
-              <DropdownMenuItem onClick={() => setShowEditModal(true)}>
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setShowDeleteAlert(true)}>
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>}
+          {user?.role === "admin" && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
+                  <MoreVertical className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-28">
+                <DropdownMenuItem onClick={() => setShowEditModal(true)}>
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowDeleteAlert(true)}>
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
 
         <p className="text-lg mb-3">{post.description}</p>
 
-        {post.file_url && (
+        {post.attachment && (
           <div className="mt-4 flex justify-end">
             <Button asChild variant="link" size="sm">
               <a
-                href={post.file_url}
+                href={post.attachment}
                 target="_blank"
                 rel="noopener noreferrer"
-                download={post.file_name || getFileNameFromUrl(post.file_url)}
+                download={
+                  post.attachment || getFileNameFromUrl(post.attachment)
+                }
                 className="text-red-500"
               >
                 Download
