@@ -42,11 +42,11 @@ const PDFFormContainer: React.FC = () => {
 
   const onSubmit = async (data: FormValues) => {
     setStatus("processing");
-    try {  
+    try {
       if (letterRef.current) {
         // 1. Generate the PDF
         const generatedPdf = await generatePDFasync(letterRef.current);
-  
+
         // 2. Trigger the download immediately
         const blobUrl = URL.createObjectURL(generatedPdf);
         const a = document.createElement("a");
@@ -56,15 +56,15 @@ const PDFFormContainer: React.FC = () => {
         a.click();
         a.remove();
         URL.revokeObjectURL(blobUrl);
-  
+
         // 3. Send email with attachment
         await sendEmailWithAttachment(generatedPdf, data);
-  
+
         // 4. Update state and toast
         setPdfFile(generatedPdf);
         form.reset();
         setStatus("success");
-  
+
         toast({
           title: "Success!",
           description:
@@ -82,7 +82,6 @@ const PDFFormContainer: React.FC = () => {
       });
     }
   };
-  
 
   return (
     <div className="container mx-auto px-4 py-5">
@@ -92,8 +91,8 @@ const PDFFormContainer: React.FC = () => {
             Help #OustKotek!
           </h1>
           <p className="text-lg text-gray-600">
-            Fill out the form below to create, store, and share your legal
-            documents with ease
+            Explore the case files and generate a letter to the Oregon Supreme
+            Court
           </p>
         </div>
       </div>
@@ -109,7 +108,7 @@ const PDFFormContainer: React.FC = () => {
         </div>
         <Card className="w-full max-w-4xl mx-auto border-none ">
           <CardHeader>
-            <CardDescription>
+            <CardDescription className="sr-only hidden">
               Explore the case files and submit a letter to the Oregon Supreme
               Court. Please complete this form to generate a letter to the
               Oregon Supreme Court acknowledging the following: 1. You are an
