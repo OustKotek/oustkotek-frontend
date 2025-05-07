@@ -16,7 +16,28 @@ const CreatePost = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) setFile(e.target.files[0]);
+    const selectedFile = e.target.files?.[0];
+    
+    if (selectedFile) {
+      // Check file size (5MB limit as an example)
+      const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
+      
+      if (selectedFile.size > maxSizeInBytes) {
+        toast({
+          title: "File too large",
+          description: "Please select a file smaller than 5MB",
+          variant: "destructive",
+        });
+        
+        // Reset the file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        return;
+      }
+      
+      setFile(selectedFile);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
