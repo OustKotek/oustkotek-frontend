@@ -1,25 +1,13 @@
 import React, { useState } from "react";
 import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { MoreVertical } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-  AlertDialogAction,
-} from "./ui/alert-dialog";
+import { MoreVertical, Download } from "lucide-react";
 import { useDeletePost } from "@/hooks/use-delete-post";
 import EditPostModal from "./EditPostModal";
 import DeleteAlertModal from "./DeleteAlertModal";
@@ -61,9 +49,44 @@ const getFileNameFromUrl = (url: string): string => {
   return fileName;
 };
 
+// Function to convert URLs in text to clickable links
+const linkifyText = (text: string) => {
+  // URL regex pattern
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  
+  // Split the text by URLs
+  const parts = text.split(urlRegex);
+  
+  // Find all URLs in the text
+  const urls = text.match(urlRegex) || [];
+  
+  // Combine parts and URLs
+  const result = [];
+  
+  for (let i = 0; i < parts.length; i++) {
+    result.push(parts[i]);
+    if (i < urls.length) {
+      result.push(
+        <a 
+          key={i} 
+          href={urls[i]} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:underline break-words"
+        >
+          {urls[i]}
+        </a>
+      );
+    }
+  }
+  
+  return result;
+};
+
 const PostCard = ({ post }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const { mutate: deletePost } = useDeletePost();
   const { user } = useAuth();
 
@@ -81,6 +104,34 @@ const PostCard = ({ post }) => {
         });
       },
     });
+  };
+
+  const handleDownloadAndNavigate = async () => {
+    try {
+      setIsDownloading(true);
+      // Fetch the file as a Blob
+      const response = await fetch(post.file_url || post.attachment);
+      const blob = await response.blob();
+
+      // Create a blob URL and anchor to trigger download
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = post.file_name || getFileNameFromUrl(post.file_url || post.attachment);
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Download failed:", error);
+      toast({
+        title: "Download failed",
+        description: "There was an error downloading the file",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -114,22 +165,21 @@ const PostCard = ({ post }) => {
           )}
         </div>
 
-        <p className="text-lg mb-3">{post.description}</p>
+        <div className="text-lg mb-3 text-left">
+          {linkifyText(post.description)}
+        </div>
 
-        {post.attachment && (
+        {(post.file_url || post.attachment) && (
           <div className="mt-4 flex justify-end">
-            <Button asChild variant="link" size="sm">
-              <a
-                href={post.attachment}
-                target="_blank"
-                rel="noopener noreferrer"
-                download={
-                  post.attachment || getFileNameFromUrl(post.attachment)
-                }
-                className="text-red-500"
-              >
-                Download
-              </a>
+            <Button 
+              onClick={handleDownloadAndNavigate} 
+              variant="outline" 
+              size="sm"
+              disabled={isDownloading}
+              className="text-red-500 flex items-center gap-1"
+            >
+              <Download className="h-4 w-4" />
+              {isDownloading ? "Downloading..." : "Download"}
             </Button>
           </div>
         )}
