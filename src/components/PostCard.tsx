@@ -22,6 +22,8 @@ const formatDate = (dateString: string) => {
   });
 };
 
+// Function to get the file name from the URL
+
 const getFileNameFromUrl = (url: string): string => {
   // Extract filename from URL
   const urlParts = url.split("/");
